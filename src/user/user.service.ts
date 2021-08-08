@@ -9,9 +9,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(userData: RegisterUserDto) {
-    const user = new this.userModel(userData);
-
-    const exists = !!(await this.getUser(userData.email));
+    const exists = await this.getUser(userData.email);
     if (exists) {
       throw new HttpException(
         {
@@ -22,6 +20,7 @@ export class UserService {
       );
     }
 
+    const user = new this.userModel(userData);
     await user.save();
   }
 

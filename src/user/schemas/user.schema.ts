@@ -1,6 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
-import { Door } from 'src/doors/schemas/door.schema';
+// import * as mongoose from 'mongoose';
+// import { Door } from 'src/doors/schemas/door.schema';
 
 export type UserDocument = User & Document;
 
@@ -21,8 +21,8 @@ export class User {
   @Prop({ required: true })
   phone: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Door' }] })
-  doorsBought: Door[];
+  // @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Door' }] })
+  // doorsBought: Door[];
 
   @Prop({ default: 'customer' })
   role: string;
