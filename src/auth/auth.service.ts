@@ -51,9 +51,8 @@ export class AuthService {
   }
 
   async getProfile(id: string, token: string) {
-    // if()
     const user: any = await this.userService.getUser({ id });
-    const tokenPayload: any = this.jwtService.decode(token.split(' ')[1]);
+    const tokenPayload: any = this.jwtService.verify(token.split(' ')[1]);
 
     if (user._id == tokenPayload.id) {
       return user;
