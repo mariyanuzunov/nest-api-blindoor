@@ -9,7 +9,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(userData: RegisterUserDto) {
-    const exists = await this.getUser(userData.email);
+    const exists = await this.getUser({ email: userData.email });
     if (exists) {
       throw new HttpException(
         {
@@ -24,7 +24,11 @@ export class UserService {
     await user.save();
   }
 
-  async getUser(email: string) {
-    return await this.userModel.findOne({ email }).lean();
+  async getUser(param: { email?: string; id?: string }) {
+    if (param.email) {
+      return await this.userModel.findOne({ email: param.email }).lean();
+    } else {
+      return await this.userModel.findById(param.id).lean();
+    }
   }
 }

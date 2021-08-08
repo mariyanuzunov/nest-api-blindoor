@@ -15,7 +15,7 @@ export class AuthService {
 
   async validateUser(credentials: LoginCredentialsDto): Promise<IUser> {
     try {
-      const user = await this.userService.getUser(credentials.email);
+      const user = await this.userService.getUser({ email: credentials.email });
       const isValid = await bcrypt.compare(
         credentials.password,
         user?.password,
@@ -37,12 +37,10 @@ export class AuthService {
     });
 
     return {
-      user: {
-        id: user._id,
-        email: user.email,
-        displayName: `${user.firstName} ${user.lastName}`,
-        phone: user.phone,
-      },
+      id: user._id,
+      email: user.email,
+      displayName: `${user.firstName} ${user.lastName}`,
+      phone: user.phone,
       accessToken,
     };
   }
@@ -50,5 +48,17 @@ export class AuthService {
   async register(userData: RegisterUserDto) {
     userData.password = await bcrypt.hash(userData.password, 10);
     await this.userService.create(userData);
+  }
+
+  async getProfile(id: string, token: string) {
+    // if()
+    const user: any = await this.userService.getUser({ id });
+    const tokenPayload: any = this.jwtService.decode(token.split(' ')[1]);
+
+    if (user._id == tokenPayload.id) {
+      return user;
+    }
+
+    throw new UnauthorizedException('Unauthorized!');
   }
 }
