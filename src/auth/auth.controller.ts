@@ -16,18 +16,13 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
-  // @Public()
-  @Get(':id')
+  @Get('profile/:id')
   async getUser(
     @Param('id') id: string,
     @Headers('Authorization') token: string,
