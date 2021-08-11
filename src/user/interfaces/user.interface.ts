@@ -6,4 +6,5 @@ export interface IUser extends Document {
   readonly lastName: string;
   readonly phone: string;
   readonly role?: string;
+  readonly itemsBought?: any;
 }

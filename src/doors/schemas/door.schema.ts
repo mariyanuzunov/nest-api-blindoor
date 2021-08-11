@@ -1,6 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-// import * as mongoose from 'mongoose';
-// import { User } from 'src/user/schemas/user.schema';
+import * as mongoose from 'mongoose';
+import { User } from 'src/user/schemas/user.schema';
 
 export type DoorDocument = Door & Document;
 
@@ -24,8 +24,8 @@ export class Door {
   @Prop({ default: 0 })
   rating: number;
 
-  // @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-  // buyers: User[];
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+  buyers: User[];
 }
 
 export const DoorSchema = SchemaFactory.createForClass(Door);
