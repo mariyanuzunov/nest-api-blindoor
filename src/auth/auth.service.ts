@@ -38,6 +38,7 @@ export class AuthService {
 
     return {
       id: user._id,
+      role: user.role,
       email: user.email,
       displayName: `${user.firstName} ${user.lastName}`,
       phone: user.phone,
@@ -55,7 +56,13 @@ export class AuthService {
     const tokenPayload: any = this.jwtService.verify(token.split(' ')[1]);
 
     if (user._id == tokenPayload.id) {
-      return user;
+      return {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+        displayName: `${user.firstName} ${user.lastName}`,
+        phone: user.phone,
+      };
     }
 
     throw new UnauthorizedException('Unauthorized!');
