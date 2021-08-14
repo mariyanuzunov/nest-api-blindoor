@@ -42,7 +42,6 @@ export class AuthService {
       email: user.email,
       displayName: `${user.firstName} ${user.lastName}`,
       phone: user.phone,
-      itemsBought: user.itemsBought,
       accessToken,
     };
   }
@@ -62,7 +61,6 @@ export class AuthService {
         role: user.role,
         email: user.email,
         displayName: `${user.firstName} ${user.lastName}`,
-        itemsBought: user.itemsBought,
         phone: user.phone,
       };
     }

@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Headers,
 } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Role } from 'src/auth/decorators/role.decorator';
@@ -46,10 +45,5 @@ export class DoorsController {
   @Role('admin')
   remove(@Param('id') id: string) {
     return this.doorsService.removeOneById(id);
-  }
-
-  @Post('/buy/:id')
-  async buy(@Param('id') id: string, @Headers('Authorization') token: string) {
-    return this.doorsService.buy(id, token);
   }
 }

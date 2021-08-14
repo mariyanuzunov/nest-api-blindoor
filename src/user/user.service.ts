@@ -26,23 +26,9 @@ export class UserService {
 
   async getUser(param: { email?: string; id?: string }) {
     if (param.email) {
-      return await await this.userModel
-        .findOne({ email: param.email })
-        .populate('itemsBought')
-        .lean();
+      return await this.userModel.findOne({ email: param.email }).lean();
     } else {
-      return await this.userModel
-        .findById(param.id)
-        .populate('itemsBought')
-        .lean();
+      return await this.userModel.findById(param.id).lean();
     }
-  }
-
-  async buyDoor(userId: string, doorId: string) {
-    return await this.userModel.findByIdAndUpdate(
-      userId,
-      { $push: { itemsBought: doorId } },
-      { new: true, useFindAndModify: false },
-    );
   }
 }
