@@ -15,10 +15,39 @@ export class OrdersService {
   }
 
   async getAllOrders() {
-    return this.orderModel
+    const orders = await this.orderModel
       .find()
+      .sort({ createdAt: 'desc' })
       .populate('products')
-      .populate('customer')
+      .populate('customer', {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        email: 1,
+        phone: 1,
+      })
+      .lean();
+
+    orders.map((order) => {
+      order.customer.displayName =
+        order.customer.firstName + ' ' + order.customer.lastName;
+    });
+
+    return orders;
+  }
+  // TODO FIX DUP
+  async getUserOrders(userId: string) {
+    return this.orderModel
+      .find({ customer: userId })
+      .sort({ createdAt: 'desc' })
+      .populate('products')
+      .populate('customer', {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        email: 1,
+        phone: 1,
+      })
       .lean();
   }
 

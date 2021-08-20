@@ -34,6 +34,12 @@ export class OrdersController {
     return this.ordersService.getAllOrders();
   }
 
+  @Get('/my-orders')
+  async getUserOrders(@Headers('Authorization') token: string) {
+    const userId = await this.authService.verifyTokenAndExtraxtId(token);
+    return this.ordersService.getUserOrders(userId);
+  }
+
   @Get(':id')
   @Role('admin')
   getOrder(@Param('id') id: string) {

@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 export type DoorDocument = Door & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Door {
   @Prop({ required: true })
   category: string;

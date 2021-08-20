@@ -14,7 +14,7 @@ export class DoorsService {
   }
 
   async getAll() {
-    return await this.doorModel.find({}).lean();
+    return await this.doorModel.find({}).sort({ createdAt: 'desc' }).lean();
   }
 
   async getOneById(id: string) {
