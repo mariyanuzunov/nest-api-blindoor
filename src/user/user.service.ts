@@ -21,14 +21,14 @@ export class UserService {
     }
 
     const user = new this.userModel(userData);
-    await user.save();
+    return user.save();
   }
 
   async getUser(param: { email?: string; id?: string }) {
     if (param.email) {
-      return await this.userModel.findOne({ email: param.email }).lean();
+      return await this.userModel.findOne({ email: param.email }).exec();
     } else {
-      return await this.userModel.findById(param.id).lean();
+      return await this.userModel.findById(param.id).exec();
     }
   }
 }

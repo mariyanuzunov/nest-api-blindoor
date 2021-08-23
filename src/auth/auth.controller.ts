@@ -36,6 +36,7 @@ export class AuthController {
   @Public()
   @Post('/register')
   async register(@Body(ValidationPipe) userData: RegisterUserDto) {
+    console.log('register controller');
     return await this.authService.register(userData);
   }
 }

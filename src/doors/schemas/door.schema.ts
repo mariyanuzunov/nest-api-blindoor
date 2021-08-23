@@ -1,4 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 export type DoorDocument = Door & Document;
 
 @Schema({ timestamps: true })
@@ -17,9 +18,6 @@ export class Door {
 
   @Prop({ required: true })
   imgUrl: string;
-
-  @Prop({ default: 0 })
-  rating: number;
 }
 
 export const DoorSchema = SchemaFactory.createForClass(Door);

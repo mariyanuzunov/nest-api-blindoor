@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Headers,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -22,7 +23,12 @@ export class OrdersController {
   ) {}
 
   @Post()
-  async create(@Body() data, @Headers('Authorization') token: string) {
+  async create(
+    @Req() { user },
+    @Body() data,
+    @Headers('Authorization') token: string,
+  ) {
+    console.log(user);
     const customer = await this.authService.verifyTokenAndExtraxtId(token);
     const orderDetails: CreateOrderDto = { customer, ...data };
     return this.ordersService.createOrder(orderDetails);

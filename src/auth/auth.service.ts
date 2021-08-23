@@ -15,11 +15,14 @@ export class AuthService {
 
   async validateUser(credentials: LoginCredentialsDto): Promise<IUser> {
     try {
-      const user = await this.userService.getUser({ email: credentials.email });
+      const user = await this.userService.getUser({
+        email: credentials.email,
+      });
       const isValid = await bcrypt.compare(
         credentials.password,
         user?.password,
       );
+
       if (user && isValid) {
         return user;
       }
@@ -37,10 +40,11 @@ export class AuthService {
     });
 
     return {
-      id: user._id,
+      _id: user._id,
       role: user.role,
       email: user.email,
       displayName: `${user.firstName} ${user.lastName}`,
+      fullName: user.fullName,
       phone: user.phone,
       accessToken,
     };
@@ -57,7 +61,7 @@ export class AuthService {
 
     if (user._id == tokenPayload.id) {
       return {
-        id: user._id,
+        _id: user._id,
         role: user.role,
         email: user.email,
         displayName: `${user.firstName} ${user.lastName}`,

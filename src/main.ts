@@ -9,7 +9,9 @@ async function bootstrap() {
   app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true,
       whitelist: true,
+      disableErrorMessages: true,
     }),
   );
 

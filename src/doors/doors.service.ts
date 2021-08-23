@@ -10,28 +10,28 @@ export class DoorsService {
   constructor(@InjectModel(Door.name) private doorModel: Model<DoorDocument>) {}
   async create(data: CreateDoorDto) {
     const door = new this.doorModel(data);
-    return await door.save();
+    return door.save();
   }
 
   async getAll() {
-    return await this.doorModel.find({}).sort({ createdAt: 'desc' }).lean();
+    return this.doorModel.find({}).sort({ createdAt: -1 }).exec();
   }
 
   async getOneById(id: string) {
-    return await this.doorModel.findById(id).lean();
+    return this.doorModel.findById(id).exec();
   }
 
   async updateOneById(id: string, updateDoorDto: UpdateDoorDto) {
-    return await this.doorModel
+    return this.doorModel
       .findByIdAndUpdate(id, updateDoorDto, {
         useFindAndModify: false,
         returnOriginal: false,
         lean: true,
       })
-      .lean();
+      .exec();
   }
 
   async removeOneById(id: string) {
-    return await this.doorModel.findByIdAndDelete(id).lean();
+    return this.doorModel.findByIdAndDelete(id);
   }
 }
