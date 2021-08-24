@@ -6,61 +6,105 @@ import {
   Patch,
   Param,
   Delete,
-  Headers,
   Req,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { AuthService } from 'src/auth/auth.service';
 import { Role } from 'src/auth/decorators/role.decorator';
+import { Request } from 'express';
+import { UserService } from 'src/user/user.service';
+import { OrderStatus } from './order.enum';
 
 @Controller('orders')
 export class OrdersController {
   constructor(
     private ordersService: OrdersService,
-    private authService: AuthService,
+    private userService: UserService,
   ) {}
 
   @Post()
-  async create(
-    @Req() { user },
-    @Body() data,
-    @Headers('Authorization') token: string,
-  ) {
-    console.log(user);
-    const customer = await this.authService.verifyTokenAndExtraxtId(token);
-    const orderDetails: CreateOrderDto = { customer, ...data };
-    return this.ordersService.createOrder(orderDetails);
+  async createOne(@Req() req: Request, @Body() data: CreateOrderDto) {
+    if (data.customer == req.user._id) {
+      try {
+        return await this.ordersService.createOrder(data);
+      } catch (error) {
+        console.error(error);
+        throw new BadRequestException();
+      }
+    }
+
+    throw new ForbiddenException();
   }
 
   @Get()
   @Role('admin')
-  getAll() {
-    return this.ordersService.getAllOrders();
+  async getAll() {
+    try {
+      return await this.ordersService.getAllOrders();
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Get('/my-orders')
-  async getUserOrders(@Headers('Authorization') token: string) {
-    const userId = await this.authService.verifyTokenAndExtraxtId(token);
-    return this.ordersService.getUserOrders(userId);
+  async getUserOrders(@Req() req: Request) {
+    try {
+      return await this.ordersService.getUserOrders(String(req.user._id));
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Get(':id')
   @Role('admin')
-  getOrder(@Param('id') id: string) {
-    return this.ordersService.getOrderById(id);
+  async getOne(@Param('id') id: string) {
+    try {
+      return await this.ordersService.getOrderById(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Patch(':id')
   @Role('admin')
-  update(@Param('id') id: string, @Body() data: UpdateOrderDto) {
-    return this.ordersService.updateOrderById(id, data);
+  async updateOne(@Param('id') id: string, @Body() data: UpdateOrderDto) {
+    try {
+      if (data.status == OrderStatus.COMPLETED) {
+        const { products: productIds, customer: customerId } =
+          await this.ordersService.getOrderById(id);
+
+        const customer = await this.userService.getUserById(String(customerId));
+
+        productIds.forEach((id) => {
+          if (!customer.purchases.includes(id)) {
+            customer.purchases.push(id);
+          }
+        });
+
+        await customer.save();
+      }
+
+      return await this.ordersService.updateOrderById(id, data);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Delete(':id')
   @Role('admin')
-  deleteOrder(@Param('id') id: string) {
-    return this.ordersService.deleteOrderById(id);
+  async deleteOne(@Param('id') id: string) {
+    try {
+      return await this.ordersService.deleteOrderById(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 }

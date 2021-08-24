@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
-import { IUser } from 'src/user/interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
+import { IUser } from 'src/shared/interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
@@ -15,18 +19,16 @@ export class AuthService {
 
   async validateUser(credentials: LoginCredentialsDto): Promise<IUser> {
     try {
-      const user = await this.userService.getUser({
-        email: credentials.email,
-      });
-      const isValid = await bcrypt.compare(
-        credentials.password,
-        user?.password,
+      const user: IUser = await this.userService.getUserByEmail(
+        credentials.email,
       );
+      const isValid = await bcrypt.compare(credentials.password, user.password);
 
       if (user && isValid) {
         return user;
       }
     } catch (error) {
+      console.error(error);
       throw new UnauthorizedException('Invalid e-mail or password.');
     }
 
@@ -43,41 +45,23 @@ export class AuthService {
       _id: user._id,
       role: user.role,
       email: user.email,
-      displayName: `${user.firstName} ${user.lastName}`,
-      fullName: user.fullName,
       phone: user.phone,
+      purcases: user.purchases,
       accessToken,
     };
   }
 
   async register(userData: RegisterUserDto) {
-    userData.password = await bcrypt.hash(userData.password, 10);
-    await this.userService.create(userData);
-  }
-
-  async getProfile(id: string, token: string) {
-    const user: any = await this.userService.getUser({ id });
-    const tokenPayload: any = this.jwtService.verify(token.split(' ')[1]);
-
-    if (user._id == tokenPayload.id) {
-      return {
-        _id: user._id,
-        role: user.role,
-        email: user.email,
-        displayName: `${user.firstName} ${user.lastName}`,
-        phone: user.phone,
-      };
-    }
-
-    throw new UnauthorizedException('Unauthorized!');
-  }
-
-  async verifyTokenAndExtraxtId(token: string) {
     try {
-      const { id } = this.jwtService.verify(token.split(' ')[1]);
-      return id;
+      userData.password = await bcrypt.hash(userData.password, 10);
+      return await this.userService.create(userData);
     } catch (error) {
-      throw new UnauthorizedException('Unauthorized!');
+      console.error(error);
+      throw new BadRequestException();
     }
+  }
+
+  async getProfile(userId: string) {
+    return this.userService.getUserById(userId);
   }
 }

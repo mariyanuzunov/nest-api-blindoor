@@ -3,73 +3,67 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderDocument } from './schemas/order.schema';
+import { OrderField } from './order.enum';
+import { Order, OrderDocument } from './schemas/order.schema';
+
+const customerFeilds = {
+  _id: 1,
+  firstName: 1,
+  lastName: 1,
+  email: 1,
+  phone: 1,
+};
+
+const productFields = {
+  _id: 1,
+  title: 1,
+  price: 1,
+  imgUrl: 1,
+};
 
 @Injectable()
 export class OrdersService {
-  constructor(@InjectModel('Order') private orderModel: Model<OrderDocument>) {}
+  constructor(
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+  ) {}
 
   async createOrder(createOrderDto: CreateOrderDto) {
     const order = new this.orderModel(createOrderDto);
-    return await order.save();
+    return order.save();
   }
 
   async getAllOrders() {
-    const orders = await this.orderModel
+    return this.orderModel
       .find()
-      .sort({ createdAt: 'desc' })
-      .populate('products')
-      .populate('customer', {
-        _id: 1,
-        firstName: 1,
-        lastName: 1,
-        email: 1,
-        phone: 1,
-      })
-      .lean();
-
-    orders.map((order) => {
-      order.customer.displayName =
-        order.customer.firstName + ' ' + order.customer.lastName;
-    });
-
-    return orders;
+      .sort({ createdAt: -1 })
+      .populate(OrderField.CUSTOMER, customerFeilds)
+      .populate(OrderField.PRODUCTS, productFields)
+      .exec();
   }
-  // TODO FIX DUP
+
   async getUserOrders(userId: string) {
     return this.orderModel
       .find({ customer: userId })
-      .sort({ createdAt: 'desc' })
-      .populate('products')
-      .populate('customer', {
-        _id: 1,
-        firstName: 1,
-        lastName: 1,
-        email: 1,
-        phone: 1,
-      })
-      .lean();
+      .sort({ createdAt: -1 })
+      .populate(OrderField.CUSTOMER, customerFeilds)
+      .populate(OrderField.PRODUCTS, productFields)
+      .exec();
   }
 
   async getOrderById(id: string) {
-    return await this.orderModel
-      .findById(id)
-      .populate('customer')
-      .populate('products')
-      .lean();
+    return this.orderModel.findById(id).exec();
   }
 
   async updateOrderById(id: string, updateOrderDto: UpdateOrderDto) {
-    await this.orderModel
+    return this.orderModel
       .findByIdAndUpdate(id, updateOrderDto, {
         useFindAndModify: false,
         returnOriginal: false,
-        lean: true,
       })
-      .lean();
+      .exec();
   }
 
   async deleteOrderById(id: string) {
-    return await this.orderModel.findByIdAndDelete(id);
+    return this.orderModel.findByIdAndDelete(id).exec();
   }
 }

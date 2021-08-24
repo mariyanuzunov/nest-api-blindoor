@@ -1,43 +1,86 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  BadRequestException,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { UserService } from 'src/user/user.service';
+import { Request } from 'express';
+import { Role } from 'src/auth/decorators/role.decorator';
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(
+    private readonly reviewsService: ReviewsService,
+    private userService: UserService,
+  ) {}
 
-  @Public()
   @Post()
-  createOne(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewsService.createOne(createReviewDto);
+  async createOne(@Req() req: Request, @Body() data: CreateReviewDto) {
+    if (req.user._id != data.author) {
+      throw new ForbiddenException();
+    }
+
+    try {
+      const user = await this.userService.getUserById(data.author);
+      if (user.purchases.includes(data.product)) {
+        return await this.reviewsService.createReview(data);
+      }
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
-  @Public()
   @Get()
-  getAll() {
-    return this.reviewsService.getAll();
+  @Role('admin')
+  async getAll() {
+    try {
+      return await this.reviewsService.getAllReviews();
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
-
-  // @Public()
-  // @Get(':id')
-  // getOne(@Param('id') id: string) {
-  //   return this.reviewsService.getOne(id);
-  // }
 
   @Public()
   @Get('item-reviews/:id')
   async getItemReview(@Param('id') id: string) {
-    return this.reviewsService.getItemReviews(id);
+    try {
+      return await this.reviewsService.getItemReviews(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
+  }
+
+  @Get('my-reviews')
+  getUserReviews(@Req() req: Request) {
+    try {
+      console.log(req.user);
+      return this.reviewsService.getUserReviews(String(req.user._id));
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Public()
-  @Get('my-reviews')
-  getUserReviews() {}
-
-  @Public()
   @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.reviewsService.deleteOne(id);
+  async deleteOne(@Param('id') id: string) {
+    try {
+      return await this.reviewsService.deleteReview(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 }

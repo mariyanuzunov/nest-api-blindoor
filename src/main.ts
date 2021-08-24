@@ -16,7 +16,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Nest API for XYZ-Doors')
+    .setTitle('Demo Nest API (blindoor)')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

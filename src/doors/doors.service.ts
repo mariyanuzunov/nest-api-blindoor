@@ -8,30 +8,30 @@ import { Door, DoorDocument } from './schemas/door.schema';
 @Injectable()
 export class DoorsService {
   constructor(@InjectModel(Door.name) private doorModel: Model<DoorDocument>) {}
-  async create(data: CreateDoorDto) {
+
+  async createDoor(data: CreateDoorDto) {
     const door = new this.doorModel(data);
     return door.save();
   }
 
-  async getAll() {
+  async getAllDoors() {
     return this.doorModel.find({}).sort({ createdAt: -1 }).exec();
   }
 
-  async getOneById(id: string) {
+  async getDoorById(id: string) {
     return this.doorModel.findById(id).exec();
   }
 
-  async updateOneById(id: string, updateDoorDto: UpdateDoorDto) {
+  async updateDoor(id: string, updateDoorDto: UpdateDoorDto) {
     return this.doorModel
       .findByIdAndUpdate(id, updateDoorDto, {
         useFindAndModify: false,
         returnOriginal: false,
-        lean: true,
       })
       .exec();
   }
 
-  async removeOneById(id: string) {
-    return this.doorModel.findByIdAndDelete(id);
+  async deleteDoor(id: string) {
+    return this.doorModel.findByIdAndDelete(id).exec();
   }
 }

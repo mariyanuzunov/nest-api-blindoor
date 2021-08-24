@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Role } from 'src/auth/decorators/role.decorator';
@@ -19,31 +20,56 @@ export class DoorsController {
 
   @Post()
   @Role('admin')
-  create(@Body() data: CreateDoorDto) {
-    return this.doorsService.create(data);
+  async createOne(@Body() data: CreateDoorDto) {
+    try {
+      return await this.doorsService.createDoor(data);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Public()
   @Get()
-  getAll() {
-    return this.doorsService.getAll();
+  async getAll() {
+    try {
+      return await this.doorsService.getAllDoors();
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Public()
   @Get(':id')
-  getOneById(@Param('id') id: string) {
-    return this.doorsService.getOneById(id);
+  async getOne(@Param('id') id: string) {
+    try {
+      return await this.doorsService.getDoorById(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Patch(':id')
   @Role('admin')
-  update(@Param('id') id: string, @Body() data: UpdateDoorDto) {
-    return this.doorsService.updateOneById(id, data);
+  async updateOne(@Param('id') id: string, @Body() data: UpdateDoorDto) {
+    try {
+      return await this.doorsService.updateDoor(id, data);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
   @Delete(':id')
   @Role('admin')
-  remove(@Param('id') id: string) {
-    return this.doorsService.removeOneById(id);
+  async deleteOne(@Param('id') id: string) {
+    try {
+      return await this.doorsService.deleteDoor(id);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 }

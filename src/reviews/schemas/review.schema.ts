@@ -8,10 +8,10 @@ export type ReviewDocument = Review & Document;
 @Schema({ timestamps: true })
 export class Review {
   @Prop({ type: Types.ObjectId, ref: User.name })
-  author: string | User;
+  author: User | string;
 
   @Prop({ type: Types.ObjectId, ref: Door.name })
-  product: string | Door;
+  product: Door | string;
 
   @Prop()
   content: string;
