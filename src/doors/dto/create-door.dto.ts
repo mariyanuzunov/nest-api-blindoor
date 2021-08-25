@@ -17,7 +17,7 @@ export class CreateDoorDto {
   @IsNotEmpty({ message: 'Description is required!' })
   description: string;
 
-  @Transform(({ value }) => value.trim())
+  // @Transform(({ value }) => value.trim())
   @Min(1, { message: 'The price must be a positive number!' })
   price: number;
 

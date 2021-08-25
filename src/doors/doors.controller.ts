@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   BadRequestException,
+  Put,
 } from '@nestjs/common';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Role } from 'src/auth/decorators/role.decorator';
@@ -54,6 +55,18 @@ export class DoorsController {
   @Patch(':id')
   @Role('admin')
   async updateOne(@Param('id') id: string, @Body() data: UpdateDoorDto) {
+    try {
+      return await this.doorsService.updateDoor(id, data);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
+  }
+
+  // TODO fix ngrx data
+  @Put(':id')
+  @Role('admin')
+  async put(@Param('id') id: string, @Body() data: UpdateDoorDto) {
     try {
       return await this.doorsService.updateDoor(id, data);
     } catch (error) {
