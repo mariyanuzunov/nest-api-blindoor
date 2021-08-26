@@ -9,6 +9,7 @@ import {
   Req,
   ForbiddenException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -72,28 +73,46 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  @Role('admin')
-  async updateOne(@Param('id') id: string, @Body() data: UpdateOrderDto) {
-    try {
-      if (data.status == OrderStatus.COMPLETED) {
-        const { products: productIds, customer: customerId } =
-          await this.ordersService.getOrderById(id);
+  async updateOne(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Body() data: UpdateOrderDto,
+  ) {
+    if (req.user.role == 'admin') {
+      try {
+        if (data.status == OrderStatus.COMPLETED) {
+          const { products: productIds, customer: customerId } =
+            await this.ordersService.getOrderById(id);
 
-        const customer = await this.userService.getUserById(String(customerId));
+          const customer = await this.userService.getUserById(
+            String(customerId),
+          );
 
-        productIds.forEach((id) => {
-          if (!customer.purchases.includes(id)) {
-            customer.purchases.push(id);
-          }
-        });
+          productIds.forEach((id) => {
+            if (!customer.purchases.includes(id)) {
+              customer.purchases.push(id);
+            }
+          });
 
-        await customer.save();
+          await customer.save();
+        }
+
+        return await this.ordersService.updateOrderById(id, data);
+      } catch (error) {
+        console.error(error);
+        throw new BadRequestException();
       }
-
-      return await this.ordersService.updateOrderById(id, data);
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException();
+    } else {
+      if (data.status != OrderStatus.CANCELED) {
+        throw new UnauthorizedException();
+      } else {
+        try {
+          return await this.ordersService.updateOrderById(id, data);
+        } catch (error) {
+          console.error(error);
+          throw new BadRequestException();
+        }
+      }
     }
   }
 
