@@ -8,6 +8,9 @@ export class Door {
   category: string;
 
   @Prop({ required: true })
+  manufacturer: string;
+
+  @Prop({ required: true })
   title: string;
 
   @Prop({ required: true })
