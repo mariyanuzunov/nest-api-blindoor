@@ -29,7 +29,7 @@ export class ReviewsService {
 
   async createReview(createReviewDto: CreateReviewDto) {
     const review = new this.reviewModel(createReviewDto);
-    return review.save();
+    return (await review.save()).populate('author').execPopulate();
   }
 
   getAllReviews() {
@@ -56,6 +56,10 @@ export class ReviewsService {
       .populate(ReviewFields.AUTHOR, authorFields)
       .sort({ createdAt: -1 })
       .exec();
+  }
+
+  getReviewById(id: string) {
+    return this.reviewModel.findById(id).exec();
   }
 
   deleteReview(id: string) {

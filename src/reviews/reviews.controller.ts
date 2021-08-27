@@ -8,6 +8,7 @@ import {
   BadRequestException,
   Req,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -73,14 +74,18 @@ export class ReviewsController {
     }
   }
 
-  @Public()
   @Delete(':id')
-  async deleteOne(@Param('id') id: string) {
-    try {
-      return await this.reviewsService.deleteReview(id);
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException();
+  async deleteOne(@Param('id') id: string, @Req() req: Request) {
+    const review = await this.reviewsService.getReviewById(id);
+    if (review.author == req.user._id || req.user.role == 'admin') {
+      try {
+        return await this.reviewsService.deleteReview(id);
+      } catch (error) {
+        console.error(error);
+        throw new BadRequestException();
+      }
     }
+
+    throw new UnauthorizedException();
   }
 }

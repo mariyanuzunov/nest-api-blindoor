@@ -45,6 +45,8 @@ export class AuthService {
       _id: user._id,
       role: user.role,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
       phone: user.phone,
       purcases: user.purchases,
       accessToken,
